@@ -85,7 +85,7 @@ public class GroupAdmin implements Sender{
 
     @Override
     public void undo() {
-        this.undo();
+        this.usb.undo();
         notify(this.usb);
     }
 }
