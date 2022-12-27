@@ -26,6 +26,24 @@ public class Tests {
         logger.info(() -> JvmUtilities.jvmInfo());
     }
 
+
+    @Test
+    public void testNotify(){
+        ConcreteMember Maya = new ConcreteMember();
+        ConcreteMember Shaked = new ConcreteMember();
+        GroupAdmin g = new GroupAdmin();
+        UndoableStringBuilder usb = new UndoableStringBuilder();
+        usb.append("Hello");
+        g.register(Maya);
+        g.notify(usb);
+        //We know that update works from test bellow therefore will check if the proccess isn't stuck in the Nofity part:
+        assertEquals("Hello", Maya.usb.toString());
+        assertEquals(null, Shaked.usb);
+        //Note that only Maya was notified
+
+
+    }
+
     @Test
     public void testRegister(){
         ConcreteMember Maya = new ConcreteMember();
@@ -43,14 +61,34 @@ public class Tests {
         GroupAdmin g = new GroupAdmin();
         g.register(Maya);
         g.register(Shaked);
+
         assertEquals(2, g.subscribers.size());
         g.unregister(Maya);
         assertEquals(1, g.subscribers.size());
+        g.append("hi");
+        assertEquals(null, Maya.usb);
+        assertEquals("hi", Shaked.usb.toString());
 
     }
 
     @Test
     public void testInsert() {
+        ConcreteMember Shaked = new ConcreteMember();
+        ConcreteMember Maya = new ConcreteMember();
+        GroupAdmin g = new GroupAdmin();
+        UndoableStringBuilder usb = new UndoableStringBuilder();
+        g.register(Shaked);
+        g.register(Maya);
+        g.append("Hello");
+        assertEquals("Hello", Maya.usb.toString());
+        g.unregister(Maya);
+
+        assertEquals("Hello", Maya.usb.toString());
+        assertEquals(1, g.subscribers.size());
+        g.insert(0,"Shaked ");
+        assertEquals("Shaked Hello", Shaked.usb.toString());
+        g.append("hi");
+        assertEquals("Shaked Hellohi", Maya.usb.toString());
 
     }
 
@@ -150,6 +188,13 @@ public class Tests {
         ga.register(newMember);
         logger.info(()->JvmUtilities.objectTotalSize(newMember));
         ga.append("Note that all three members will have the same memory now");
+
+        logger.info(()->JvmUtilities.objectTotalSize(Shaked));
+        logger.info(()->JvmUtilities.objectTotalSize(Maya));
+        logger.info(()->JvmUtilities.objectTotalSize(newMember));
+
+        ga.unregister(newMember);
+        ga.undo();
 
         logger.info(()->JvmUtilities.objectTotalSize(Shaked));
         logger.info(()->JvmUtilities.objectTotalSize(Maya));

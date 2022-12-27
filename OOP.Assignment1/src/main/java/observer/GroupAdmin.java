@@ -42,6 +42,7 @@ public class GroupAdmin implements Sender{
     @Override
     public void unregister(Member obj) {
         subscribers.remove(obj);
+
     }
 
     /**
