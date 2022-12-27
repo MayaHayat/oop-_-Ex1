@@ -1,5 +1,6 @@
 import observer.ConcreteMember;
 import observer.GroupAdmin;
+import observer.UndoableStringBuilder;
 import org.junit.jupiter.api.Test;
 import org.junit.platform.commons.logging.Logger;
 import org.junit.platform.commons.logging.LoggerFactory;
@@ -49,7 +50,7 @@ public class Tests {
     }
 
     @Test
-    public void testInsert(){
+    public void testInsert() {
 
     }
 
@@ -87,6 +88,72 @@ public class Tests {
         assertEquals("OneTwo", Maya.usb.toString());
         g.undo();
         assertEquals("One", Maya.usb.toString());
+
+    }
+
+    @Test
+    public void testUpdate(){
+        GroupAdmin ga = new GroupAdmin();
+        ga.append("Trying");
+        ConcreteMember cm = new ConcreteMember();
+        assertEquals(null, cm.usb);
+        ga.register(cm);
+        assertEquals(null, cm.usb);
+
+        ga.delete(1,2);
+        assertEquals("Tying", cm.usb.toString());
+    }
+
+
+    @Test
+    public void testCopy(){
+        ConcreteMember Maya = new ConcreteMember();
+        ConcreteMember Shaked = new ConcreteMember();
+        GroupAdmin g = new GroupAdmin();
+        g.register(Maya);
+        g.register(Shaked);
+        g.append("Trying shallow copy");
+        assertEquals(g.usb, Shaked.usb);
+        assertEquals(Maya.usb, Shaked.usb);
+    }
+
+    @Test
+    void JVMUTILT_test() {
+
+       GroupAdmin ga = new GroupAdmin();
+        logger.info(() -> JvmUtilities.objectFootprint(ga));
+        ConcreteMember Shaked = new ConcreteMember();
+        ga.register(Shaked);
+        logger.info(() -> JvmUtilities.objectTotalSize(Shaked));
+        ga.append("Only Shaked is registered");
+        logger.info(() -> JvmUtilities.objectTotalSize(Shaked));
+        ga.append("to this list");
+        ConcreteMember Maya = new ConcreteMember();
+        ga.register(Maya);
+
+        logger.info(()->JvmUtilities.objectTotalSize(Shaked));
+        logger.info(()->JvmUtilities.objectTotalSize(Maya));
+
+        ga.append("Now Maya is also added");
+        logger.info(()->JvmUtilities.objectTotalSize(Shaked));
+        logger.info(()->JvmUtilities.objectTotalSize(Maya));
+
+        logger.info(() -> JvmUtilities.objectFootprint(ga));
+        ga.undo();
+
+        logger.info(()->JvmUtilities.objectTotalSize(Shaked));
+        logger.info(()->JvmUtilities.objectTotalSize(Maya));
+
+        logger.info(() -> JvmUtilities.objectFootprint(ga));
+
+        ConcreteMember newMember = new ConcreteMember();
+        ga.register(newMember);
+        logger.info(()->JvmUtilities.objectTotalSize(newMember));
+        ga.append("Note that all three members will have the same memory now");
+
+        logger.info(()->JvmUtilities.objectTotalSize(Shaked));
+        logger.info(()->JvmUtilities.objectTotalSize(Maya));
+        logger.info(()->JvmUtilities.objectTotalSize(newMember));
 
     }
 
